@@ -8,7 +8,6 @@ pkgs.mkShell {
         go
         gotools
         go-tools
-        mysql-shell
     ];
 
     shellHook = ''
