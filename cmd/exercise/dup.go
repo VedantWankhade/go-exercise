@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-    dup2()    
+    dup4()    
 }
 
 func dup1() {
@@ -72,6 +72,37 @@ func dup3() {
     for line, n := range counts {
         if n > 1 {
             fmt.Println(n, line)
+        }
+    }
+}
+
+func dup4() {
+    counts := make(map[string]map[string]int)
+    files := os.Args[1:]
+    for _, file := range files {
+        ofile, err := os.Open(file)
+        if err != nil {
+            fmt.Println("Error reading file", file)
+            continue
+        }
+        in := bufio.NewScanner(ofile)
+        for in.Scan() {
+            if counts[in.Text()] == nil {
+                counts[in.Text()] = make(map[string]int)
+            }
+            counts[in.Text()][string(file)]++
+        }
+    }
+    for line, data := range counts {
+        totalCount := 0
+        for _, count := range data {
+            totalCount += count
+        }
+        if totalCount > 1 {
+            fmt.Printf("Line: %s Total Count: %d\n", line, totalCount)
+            for filename, count := range data {
+                fmt.Printf("File: %v Count: %d\n", filename, count)
+            }
         }
     }
 }
