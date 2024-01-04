@@ -1,14 +1,17 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
+	"strings"
 )
 
 func main() {
     // echo1()
     // echo2()
-    betterEcho()
+    // betterEcho()
+    efficientEcho()
+    // efficientEcho1()
 }
 
 func echo1() {
@@ -47,4 +50,14 @@ func betterEcho() {
        }
     }
     fmt.Println(res)
+}
+
+// efficientEcho is an efficient implementation as it prevent creation
+// of new string every iteration
+func efficientEcho() {
+    fmt.Println(strings.Join(os.Args[1:], " "))
+}
+
+func efficientEcho1() {
+    fmt.Println(os.Args[1:])
 }
