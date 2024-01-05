@@ -1,6 +1,7 @@
 package main
 
 import (
+    "flag"
 	"fmt"
 	"os"
 	"strings"
@@ -10,8 +11,9 @@ func main() {
     // echo1()
     // echo2()
     // betterEcho()
-    efficientEcho()
+    // efficientEcho()
     // efficientEcho1()
+    echo3()
 }
 
 func echo1() {
@@ -60,4 +62,15 @@ func efficientEcho() {
 
 func efficientEcho1() {
     fmt.Println(os.Args[1:])
+}
+
+// takes flags through cmd
+func echo3() {
+    n := flag.Bool("n", false, "emit trailing newline")
+    sep := flag.String("s", " ", "separator")
+    flag.Parse()
+    fmt.Print(strings.Join(flag.Args(), *sep))
+    if !*n {
+        fmt.Println()
+    }
 }
