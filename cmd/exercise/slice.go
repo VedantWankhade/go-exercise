@@ -15,7 +15,7 @@ func main() {
     fmt.Println(remove(arr, 1))
 }
 
-func append(arr []int, num int) []int {
+func _append(arr []int, num int) []int {
     var res []int
     resLen := len(arr) + 1
     if resLen <= cap(arr) {
