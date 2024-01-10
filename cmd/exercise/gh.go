@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -58,6 +59,9 @@ const (
 
 var daysOld *int = flag.Int("days", 15, "Get at most 'days' old issues.")
 var repo *string = flag.String("repo", "", "Repository name (owner:reponame)")
+var serve *bool = flag.Bool("serve", false, "Start a webserver to navigate issues")
+var port *int = flag.Int("port", 8080, "Port to start server on")
+var issues []Issue
 
 func main() {
 	var reportType Report
@@ -88,7 +92,6 @@ func main() {
 		os.Exit(1)
 	}
 	defer res.Body.Close()
-	var issues []Issue
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("oops!!")
@@ -108,14 +111,41 @@ func main() {
 			old = append(old, issue)
 		}
 	}
-	report(issues, reportType)
+	if !*serve {
+		report(os.Stdout, issues, reportType)
+		os.Exit(0)
+	}
+	// server
+	http.HandleFunc("/issue/", showIssue)
+	fmt.Printf("Starting server on : http://localhost:%d", *port)
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil); err != nil {
+		log.Fatal("Error starting the server:", err)
+	}
+}
+
+func showIssue(w http.ResponseWriter, r *http.Request) {
+	urlParts := strings.Split(fmt.Sprintf("%s", r.URL), "/")
+	if len(urlParts) != 3 {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	issueNumber, err := strconv.Atoi(urlParts[2])
+	if err != nil || issueNumber <= 0 || issueNumber >= len(issues) {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	_showIssue(w, issueNumber)
+}
+
+func _showIssue(w http.ResponseWriter, issueNumber int) {
+	report(w, []Issue{issues[issueNumber-1]}, html)
 }
 
 func daysAgo(t time.Time) int {
 	return int(time.Since(t).Hours() / 24)
 }
 
-func report(issues []Issue, reportType Report) {
+func report(w io.Writer, issues []Issue, reportType Report) {
 	var reportStdout string = `{{.TotalCount}} issues:
 	{{range .Items}}--------------------------------------
 	Title: {{.Title}}
@@ -156,10 +186,10 @@ func report(issues []Issue, reportType Report) {
 	if err != nil {
 		log.Fatal("Error parsing template: ", err)
 	}
-	if err := report.Execute(os.Stdout, struct {
+	if err := report.Execute(w, struct {
 		TotalCount int
 		Items      []Issue
-	}{10, issues}); err != nil {
+	}{len(issues), issues}); err != nil {
 		log.Fatal(err)
 	}
 }
