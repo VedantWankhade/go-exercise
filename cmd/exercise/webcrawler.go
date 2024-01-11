@@ -14,12 +14,27 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "webcrawler: %v\n", err)
 		os.Exit(1)
-	}
-	for _, link := range visit(nil, doc) {
-		fmt.Println(link)
-	}
-	outline(nil, doc)
-    forEachNode(doc, startElement, endElement)
+	}	
+	// outline(nil, doc)
+    // forEachNode(doc, startElement, endElement)
+    fmt.Println(Extract(doc))
+}
+
+func Extract(root *html.Node) ([]string, error) {
+    links := []string{}
+    var visitNode func(*html.Node) = nil
+    visitNode = func(node *html.Node) {
+        if node.Type == html.ElementNode && node.Data == "a" {
+		    for _, a := range node.Attr {
+			    if a.Key == "href" {
+				    links = append(links, a.Val)
+			    }
+		    }
+
+	    }
+    }
+    forEachNode(root, visitNode, nil)
+    return links, nil
 }
 
 func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
