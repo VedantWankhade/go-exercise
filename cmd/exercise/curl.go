@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"time"
 )
@@ -13,7 +14,9 @@ import (
 func main() {
 	// parallelCurl()
 
-	curl1()
+	//curl1()
+    url := os.Args[1]
+    deferredCurl(url)
 }
 
 func curl1() {
@@ -100,4 +103,28 @@ func fetch(url string, ch chan<- string, n int) {
 			ch <- fmt.Sprintf("%.2fs\t%7d\t%s\n", time.Since(start).Seconds(), nbytes, url)
 		}
 	}
+}
+
+// deferred curl
+func deferredCurl(url string) (filename string, n int64, err error) {
+    res, err := http.Get(url)
+    if err != nil {
+        return "", 0, err
+    }
+    defer res.Body.Close()
+
+    local := "/tmp/deferredCurl" + path.Base(res.Request.URL.Path)
+
+    if local == "/tmp/deferredCurl/" {
+        local = "/tmp/deferredCurl/index.html"
+    }
+    f, err := os.Create(local)
+    if err != nil {
+        return "", 0, err
+    }
+    n, err = io.Copy(f, res.Body)
+    if closeErr := f.Close(); err == nil {
+        err = closeErr
+    }
+    return local, n, err
 }
