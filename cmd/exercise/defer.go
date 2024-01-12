@@ -22,6 +22,8 @@ func trace(msg string) func() {
 func main() {
     slowoperation()
     double(2)
+    // demonstrate deferred function runs after panic
+    f(3)
 }
 
 func double(x int) (res int) {
@@ -31,4 +33,11 @@ func double(x int) (res int) {
     }()
 
     return x + x
+}
+
+// after panic, deferred functions are called in reverse order - top to bottom of stack
+func f(x int) {
+    fmt.Printf("f(%d)\n", x+0/x) // panics at x = 0
+    defer fmt.Printf("defer %d\n", x)
+    f(x-1)
 }
