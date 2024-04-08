@@ -1,4 +1,4 @@
-package main
+package lissajous
 
 import (
 	"image"
@@ -7,7 +7,6 @@ import (
 	"io"
 	"math"
 	"math/rand"
-	"os"
 )
 
 var palette = []color.Color{color.White, color.Black}
@@ -15,13 +14,13 @@ var palette = []color.Color{color.White, color.Black}
 const whiteIndex = 0
 const blackIndex = 1
 
-func main() {
-	lissajous(os.Stdout)
-}
+// func main() {
+// 	lissajous(os.Stdout)
+// }
 
-func lissajous(out io.Writer) {
+func Lissajous(out io.Writer, cyclesIn int) {
+	cycles := float64(cyclesIn)
 	const (
-		cycles  = 5
 		res     = 0.001
 		size    = 100
 		nframes = 64
