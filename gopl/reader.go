@@ -38,6 +38,5 @@ type LimitReader struct {
 }
 
 func (lr *LimitReader) Read() {
-	lr.reader.Read()
-	fmt.Println("printed with limitreader")
+	fmt.Println(lr.reader.Read(), "printed with limitreader")
 }
