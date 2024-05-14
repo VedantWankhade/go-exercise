@@ -1,6 +1,6 @@
 // https://leetcode.com/problems/contains-duplicate/description/
 
-package main
+package neetcode
 
 func containsDuplicate(nums []int) bool {
 	if len(nums) < 2 {
